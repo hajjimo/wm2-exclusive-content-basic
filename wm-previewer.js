@@ -1,38 +1,38 @@
-function getWmTag () {
-  return document.head.querySelector('meta[name="monetization"]')
+function getWmTag() {
+  return document.querySelector('link[rel="monetization"]');
 }
 
-function uuid () {
+function uuid() {
   // TODO: make the uuid random
-  return 'fc23b14d-70e4-4d55-b0a0-dd86f70ce402'
+  return "fc23b14d-70e4-4d55-b0a0-dd86f70ce402";
 }
 
-function wmStateTransition () {
-  const wmTag = getWmTag()
-  const state = document.monetization.state
+/*function wmStateTransition() {
+  const wmTag = getWmTag();
+  const state = document.monetization.state;
   if (wmTag) {
-    if (state === 'stopped') {
-      startWm()
+    if (state === "stopped") {
+      startWm();
     }
   }
-}
+}*/
 
-function observeWm () {
-  const headObserver = new MutationObserver(mutations => {
-    const wmTag = getWmTag()
-    const state = document.monetization.state
+/*function observeWm() {
+  const headObserver = new MutationObserver((mutations) => {
+    const wmTag = getWmTag();
+    const state = document.monetization.state;
 
-    if (!wmTag && state === 'started') stopWm()
-    if (wmTag && state === 'stopped') {
-      pendingWm()
+    if (!wmTag && state === "started") stopWm();
+    if (wmTag && state === "stopped") {
+      pendingWm();
       // TODO: observe wmTag for attribute changes?
     }
-  })
-  
-  headObserver.observe(document.head, { childList: true })
-}
+  });
 
-function initWm () {
+  headObserver.observe(document.head, { childList: true });
+}
+*/
+/*function initWm () {
   document.monetization = document.createElement('div')
   document.monetization.state = 'stopped'
 
@@ -40,90 +40,101 @@ function initWm () {
   if (getWmTag()) {
     pendingWm()
   }
+}*/
+
+function initWm2() {
+  const wm2Tag = getWmTag();
+  wm2Tag.addEventListener("monetization", event => {
+    // See how much was sent and in what currency
+    const { amount, assetCode, assetScale } = event;
+    console.log(`Browser sent ${assetCode}${amount / (10 * assetScale)}.`);
+
+})}
+                                                                                             
+/*function pendingWm() {
+  document.monetization._requestId = uuid();
+  emitWm("pending", "pending");
+  document.monetization._startWmTimer = setTimeout(startWm, 700);
 }
 
-
-
-function pendingWm () {
-  document.monetization._requestId = uuid()
-  emitWm('pending', 'pending')
-  document.monetization._startWmTimer = setTimeout(startWm, 700)
+function startWm() {
+  emitWm("start", "started");
+  startWmIcon();
+  progressWm();
+  document.monetization._wmProgressInterval = setInterval(progressWm, 1000);
 }
-
-
-
-function startWm () {
-  emitWm()
-  startWmIcon()
- // progressWm()
- // document.monetization._wmProgressInterval = setInterval(progressWm, 1000)
-}
-
-function emitWm () {
-  const wmTag = getWmTag()
-  const link = document.querySelector('link[rel="monetization"]')
-  if (!wmTag) {
-    throw new Error('cannot emit w/o link tag')
+*/
+/*function emitWm(name, state) {
+  const wm2Tag = getWmTag();
+  if (!wm2Tag) {
+    throw new Error("cannot emit " + name + " w/o link tag");
   }
-  
-  //document.monetization._wmTag = wmTag
-  //document.monetization.state = state
-  link.dispatchEvent(new CustomEvent('monetization', {
-    detail: {
-      requestId: uuid(),
-      paymentPointer: wmTag.content 
-    }
-  }))
-}
 
-function progressWm () {
-  const wmTag = document.monetization._wmTag 
-  if (!wmTag) {
-    throw new Error('cannot emit progress w/o meta tag')
-  }
-  
-  document.monetization.dispatchEvent(new CustomEvent('monetizationprogress', {
-    detail: {
-      requestId: document.monetization._requestId,
-      paymentPointer: wmTag.content,
-      amount: String(Math.floor(50000 + Math.random() * 100000)),
-      assetCode: 'USD',
-      assetScale: 9
-    }
-  }))
+  document.monetization._wmTag = wm2Tag;
+//  document.monetization.state = state;
+  document.monetization.dispatchEvent(
+    new CustomEvent("monetization" + name, {
+      detail: {
+        requestId: document.monetization._requestId,
+        paymentPointer: wm2Tag.content,
+      },
+    })
+  );
 }
-
-function stopWm () {
-  const wmTag = document.monetization._wmTag 
+*/
+/*
+function progressWm() {
+  const wmTag = document.monetization._wmTag;
   if (!wmTag) {
-    throw new Error('cannot emit stop w/o meta tag')
+    throw new Error("cannot emit progress w/o meta tag");
   }
-  
-  stopWmIcon()
-  
+
+  document.monetization.dispatchEvent(
+    new CustomEvent("monetization", {
+      detail: {
+        requestId: document.monetization._requestId,
+        paymentPointer: wmTag.content,
+        amount: String(Math.floor(50000 + Math.random() * 100000)),
+        assetCode: "USD",
+        assetScale: 9,
+      },
+    })
+  );
+}
+*/
+function stopWm() {
+  const wmTag = document.monetization._wmTag;
+  if (!wmTag) {
+    throw new Error("cannot emit stop w/o meta tag");
+  }
+
+  stopWmIcon();
+
   if (document.monetization._startWmTimer) {
-    clearTimeout(document.monetization._startWmTimer)
+    clearTimeout(document.monetization._startWmTimer);
   }
-  
+
   if (document.monetization._wmProgressInterval) {
-    clearTimeout(document.monetization._wmProgressInterval)
+    clearTimeout(document.monetization._wmProgressInterval);
   }
-  
-  document.monetization.state = 'stopped'
-  document.monetization.dispatchEvent(new CustomEvent('monetizationstop', {
-    detail: {
-      requestId: document.monetization._requestId,
-      paymentPointer: wmTag.content,
-      finalized: true
-    }
-  }))
+
+  document.monetization.state = "stopped";
+  document.monetization.dispatchEvent(
+    new CustomEvent("monetizationstop", {
+      detail: {
+        requestId: document.monetization._requestId,
+        paymentPointer: wmTag.content,
+        finalized: true,
+      },
+    })
+  );
 }
 
 function isWm () {
   const pageUrl = new URL(window.location)
   return pageUrl.searchParams.get('wm') === 'true'
 }
-
+  
 function createWmWidget () {
   const div = document.createElement('div')
   div.style.position = 'fixed'
@@ -163,45 +174,44 @@ function createWmWidget () {
 const STOPPED_ICON_SRC = 'https://cdn.glitch.com/09917b2c-dfe3-453d-be95-5e0af0bf966c%2Fwm-icon.svg?1584146864109'
 const STARTED_ICON_SRC = 'https://cdn.glitch.com/09917b2c-dfe3-453d-be95-5e0af0bf966c%2Fwm-icon-animated.svg?1584146706079'
 
-function addWmIcon () {
-  const img = document.createElement('img')
-  img.src = STOPPED_ICON_SRC
-  img.style.position = 'fixed'
-  img.style.right = '20px'
-  img.style.bottom = '70px'
-  img.style.width = '40px'
-  img.style.height = '40px'
-  img.id = 'wm-icon'
-  
-  window.addEventListener('load', () => {
-    document.body.appendChild(img)
-  })
+function addWmIcon() {
+  const img = document.createElement("img");
+  img.src = STOPPED_ICON_SRC;
+  img.style.position = "fixed";
+  img.style.right = "20px";
+  img.style.bottom = "70px";
+  img.style.width = "40px";
+  img.style.height = "40px";
+  img.id = "wm-icon";
+
+  window.addEventListener("load", () => {
+    document.body.appendChild(img);
+  });
 }
 
-function stopWmIcon () {
-  document.getElementById('wm-icon').src = STOPPED_ICON_SRC
+function stopWmIcon() {
+  document.getElementById("wm-icon").src = STOPPED_ICON_SRC;
 }
 
-function startWmIcon () {
-  document.getElementById('wm-icon').src = STARTED_ICON_SRC
+function startWmIcon() {
+  document.getElementById("wm-icon").src = STARTED_ICON_SRC;
 }
 
-function start () {
+function start() {
   // This is just for embedded demos
   if (window === window.top) {
-    return
+    return;
   }
-  
-  createWmWidget()
+
+  createWmWidget();
   if (isWm()) {
-    addWmIcon()
-    console.log('creating web monetization')
-    startWm()
+    addWmIcon();
+    console.log("creating web monetization");
+    initWm2();
+    
   } else {
-    delete document.monetization
+    delete document.monetization;
   }
 }
 
 start()
-
-
